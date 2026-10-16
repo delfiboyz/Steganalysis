@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Steganalysis - Deteksi LSB Steganography</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+</head>
+<body>
+<header>
+  <h1>🔍 Steganalysis</h1>
+  <p>Deteksi LSB Steganography pada Citra Digital — Perbandingan Chi-Square Attack vs RS Analysis</p>
+</header>
+
+<main>
+  <section class="upload-card" id="uploadCard">
+    <form id="uploadForm">
+      <div class="dropzone" id="dropzone">
+        <p id="dropzoneText">Seret &amp; letakkan citra di sini, atau klik untuk memilih file</p>
+        <p class="hint">Format: PNG, BMP, TIFF, JPG (maks 20MB)</p>
+        <input type="file" id="fileInput" name="image" accept=".png,.bmp,.tif,.tiff,.jpg,.jpeg" hidden>
+      </div>
+      <img id="preview" alt="preview" hidden>
+      <button type="submit" id="analyzeBtn" disabled>Analisis Citra</button>
+    </form>
+    <div id="errorBox" class="error" hidden></div>
+    <div id="loading" class="loading" hidden>Menganalisis citra... <span class="spinner"></span></div>
+  </section>
+
+  <section id="resultsSection" hidden>
+    <div class="verdict-card" id="verdictCard">
+      <h2 id="verdictText"></h2>
+      <div class="verdict-meta">
+        <span id="confidenceBadge" class="badge"></span>
+        <span id="fileMeta"></span>
+      </div>
+      <p id="verdictNote" class="verdict-note" hidden></p>
+    </div>
+
+    <div class="method-compare">
+      <div class="method-box">
+        <h3>Chi-Square Attack</h3>
+        <p class="method-desc">Membandingkan frekuensi pasangan nilai piksel (2k, 2k+1) terhadap distribusi yang diharapkan jika LSB disisipi pesan acak secara sekuensial.</p>
+      </div>
+      <div class="method-box">
+        <h3>RS Analysis</h3>
+        <p class="method-desc">Mengklasifikasikan grup piksel menjadi Regular/Singular berdasarkan perubahan "kehalusan" lokal saat LSB di-flip, lalu mengestimasi panjang pesan dari pergeseran simetri RM/SM.</p>
+      </div>
+    </div>
+
+    <p class="methodology-note">
+      Catatan: Chi-Square Attack dikenal lebih rentan terhadap false positive pada citra dengan histogram alami yang halus/bertekstur (lihat Westfeld, 2001), sedangkan RS Analysis umumnya lebih robust di berbagai jenis citra namun lebih berat secara komputasi. Gunakan kedua hasil sebagai perbandingan — jika keduanya sepakat, tingkat keyakinan hasil lebih tinggi.
+    </p>
+
+    <div class="channel-tabs" id="channelTabs"></div>
+
+    <div class="charts">
+      <div class="chart-box">
+        <h4>Kurva P-Value Chi-Square</h4>
+        <canvas id="chiChart"></canvas>
+      </div>
+      <div class="chart-box">
+        <h4>RS Analysis (R/S per Mask)</h4>
+        <canvas id="rsChart"></canvas>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <h4>Tabel Perbandingan per Channel</h4>
+      <table id="compareTable">
+        <thead>
+          <tr>
+            <th>Channel</th>
+            <th>Peran</th>
+            <th>Chi-Square: Terdeteksi?</th>
+            <th>Chi-Square: Estimasi (%)</th>
+            <th>RS: Terdeteksi?</th>
+            <th>RS: Estimasi (%)</th>
+            <th>Sepakat?</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <p>Alat edukasi &amp; riset steganalysis. Tidak ada file yang disimpan di server — seluruh analisis dilakukan di memori.</p>
+</footer>
+
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
